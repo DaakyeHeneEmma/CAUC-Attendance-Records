@@ -4,22 +4,27 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import DashboardLayout from '../layout';
 
-export default function FacultyDashboard() {
+export default function LecturerDashboard() {
   const [classes, setClasses] = useState([]);
-  const [attendance, setAttendance] = useState([]);
-  const [stats, setStats] = useState({ totalStudents: 0, todayAttendance: 0, attendanceRate: 0 });
-  const [selectedClass, setSelectedClass] = useState(null);
+  const [enrollments, setEnrollments] = useState({});
   const [loading, setLoading] = useState(true);
+  const [selectedClass, setSelectedClass] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [classesRes, statsRes] = await Promise.all([
-          axios.get('/api/classes'),
-          axios.get('/api/attendance/stats')
-        ]);
-        setClasses(classesRes.data);
-        setStats(statsRes.data);
+        const classRes = await axios.get('/api/structure/classes');
+        setClasses(classRes.data);
+        
+        const enrollRes = await axios.get('/api/structure/enrollments');
+        const enrollMap = {};
+        enrollRes.data.forEach(e => {
+          if (!enrollMap[e.classId._id]) {
+            enrollMap[e.classId._id] = [];
+          }
+          enrollMap[e.classId._id].push(e);
+        });
+        setEnrollments(enrollMap);
       } catch (err) {
         console.error(err);
       } finally {
@@ -29,26 +34,11 @@ export default function FacultyDashboard() {
     fetchData();
   }, []);
 
-  const viewAttendance = async (classId) => {
-    try {
-      const res = await axios.get(`/api/attendance/class/${classId}`);
-      setAttendance(res.data);
-      setSelectedClass(classId);
-    } catch (err) {
-      console.error(err);
-    }
+  const viewEnrollments = (classId) => {
+    setSelectedClass(classId);
   };
 
-  const updateStatus = async (attendanceId, status) => {
-    try {
-      await axios.put(`/api/attendance/${attendanceId}`, { status });
-      viewAttendance(selectedClass);
-    } catch (err) {
-      alert('Failed to update attendance');
-    }
-  };
-
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <DashboardLayout><p>Loading...</p></DashboardLayout>;
 
   return (
     <DashboardLayout>
@@ -57,36 +47,42 @@ export default function FacultyDashboard() {
           <h3>My Classes</h3>
           <div className="value">{classes.length}</div>
         </div>
-        <div className="statCard">
-          <h3>Today's Attendance</h3>
-          <div className="value">{stats.todayAttendance}</div>
-        </div>
-        <div className="statCard">
-          <h3>Attendance Rate</h3>
-          <div className="value">{stats.attendanceRate}%</div>
-        </div>
       </div>
 
       <div className="tableContainer">
-        <h2>My Classes</h2>
+        <h2 style={{ color: 'white', marginBottom: '15px' }}>My Classes</h2>
         <table>
           <thead>
             <tr>
-              <th>Class</th>
               <th>Course</th>
+              <th>Type</th>
               <th>Schedule</th>
+              <th>Location</th>
+              <th>Enrolled</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {classes.map((cls) => (
               <tr key={cls._id}>
-                <td>{cls.name}</td>
-                <td>{cls.courseId?.name}</td>
-                <td>{cls.schedule?.day} {cls.schedule?.startTime} - {cls.schedule?.endTime}</td>
                 <td>
-                  <button onClick={() => viewAttendance(cls._id)} className="btn btnPrimary">
-                    View Attendance
+                  <strong>{cls.courseId?.name}</strong>
+                  <br/>
+                  <small style={{ color: '#888' }}>{cls.courseId?.code}</small>
+                </td>
+                <td style={{ textTransform: 'capitalize' }}>{cls.type}</td>
+                <td>
+                  {cls.schedule?.day && cls.schedule?.day.charAt(0).toUpperCase() + cls.schedule?.day.slice(1)}
+                  <br/>
+                  <small style={{ color: '#888' }}>
+                    {cls.schedule?.startTime} - {cls.schedule?.endTime}
+                  </small>
+                </td>
+                <td>{cls.location || 'N/A'}</td>
+                <td>{enrollments[cls._id]?.length || 0}</td>
+                <td>
+                  <button onClick={() => viewEnrollments(cls._id)} className="btn btnPrimary">
+                    View Students
                   </button>
                 </td>
               </tr>
@@ -95,44 +91,34 @@ export default function FacultyDashboard() {
         </table>
       </div>
 
-      {selectedClass && (
+      {selectedClass && enrollments[selectedClass] && (
         <div className="tableContainer" style={{ marginTop: '20px' }}>
-          <h3>Class Attendance</h3>
+          <h3 style={{ color: 'white', marginBottom: '15px' }}>
+            Students in Class
+            <button 
+              onClick={() => setSelectedClass(null)} 
+              className="btn btnDanger" 
+              style={{ marginLeft: '20px', padding: '5px 10px' }}
+            >
+              Close
+            </button>
+          </h3>
           <table>
             <thead>
               <tr>
-                <th>Student</th>
                 <th>Student ID</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th>Name</th>
+                <th>Email</th>
               </tr>
             </thead>
             <tbody>
-              {attendance.length === 0 ? (
-                <tr><td colSpan="4">No attendance records yet</td></tr>
-              ) : (
-                attendance.map((record) => (
-                  <tr key={record._id}>
-                    <td>{record.studentId?.name}</td>
-                    <td>{record.studentId?.studentId}</td>
-                    <td className={`status${record.status.charAt(0).toUpperCase() + record.status.slice(1)}`}>
-                      {record.status}
-                    </td>
-                    <td>
-                      <select
-                        value={record.status}
-                        onChange={(e) => updateStatus(record._id, e.target.value)}
-                        className="formGroup"
-                      >
-                        <option value="present">Present</option>
-                        <option value="absent">Absent</option>
-                        <option value="late">Late</option>
-                        <option value="excused">Excused</option>
-                      </select>
-                    </td>
-                  </tr>
-                ))
-              )}
+              {enrollments[selectedClass].map((enroll) => (
+                <tr key={enroll._id}>
+                  <td>{enroll.studentId?.studentId}</td>
+                  <td>{enroll.studentId?.name}</td>
+                  <td>{enroll.studentId?.email}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

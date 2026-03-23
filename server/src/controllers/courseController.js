@@ -70,8 +70,22 @@ exports.deleteCourse = async (req, res) => {
 
 exports.getClasses = async (req, res) => {
   try {
-    const query = req.user.role === 'faculty' ? { facultyId: req.user.id } : {};
-    const classes = await Class.find(query).populate('courseId').populate('facultyId', 'name');
+    let query = {};
+    
+    if (req.user.role === 'faculty') {
+      query.facultyId = req.user.id;
+    } else if (req.user.role === 'student') {
+      const Student = require('../models/Student');
+      const student = await Student.findOne({ userId: req.user.id });
+      if (student) {
+        query.facultyId = student.facultyId;
+      }
+    }
+    
+    const classes = await Class.find(query)
+      .populate('courseId')
+      .populate('facultyId', 'name')
+      .populate('students', 'name studentId email');
     res.json(classes);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -110,6 +124,46 @@ exports.deleteClass = async (req, res) => {
   try {
     await Class.findByIdAndDelete(req.params.id);
     res.json({ msg: 'Class deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.addStudentToClass = async (req, res) => {
+  try {
+    const { studentId } = req.body;
+    const classItem = await Class.findById(req.params.id);
+    if (!classItem) return res.status(404).json({ msg: 'Class not found' });
+    
+    if (classItem.students.includes(studentId)) {
+      return res.status(400).json({ msg: 'Student already in class' });
+    }
+    
+    classItem.students.push(studentId);
+    await classItem.save();
+    const populatedClass = await Class.findById(req.params.id)
+      .populate('courseId')
+      .populate('facultyId', 'name')
+      .populate('students', 'name studentId email');
+    res.json(populatedClass);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.removeStudentFromClass = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const classItem = await Class.findById(req.params.id);
+    if (!classItem) return res.status(404).json({ msg: 'Class not found' });
+    
+    classItem.students = classItem.students.filter(s => s.toString() !== studentId);
+    await classItem.save();
+    const populatedClass = await Class.findById(req.params.id)
+      .populate('courseId')
+      .populate('facultyId', 'name')
+      .populate('students', 'name studentId email');
+    res.json(populatedClass);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

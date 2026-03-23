@@ -1,10 +1,15 @@
 const Student = require('../models/Student');
-const Course = require('../models/Course');
 const Attendance = require('../models/Attendance');
 
 exports.getStudents = async (req, res) => {
   try {
-    const students = await Student.find().populate('courseId').populate('classId');
+    let query = {};
+    
+    if (req.user.role === 'faculty') {
+      query.facultyId = req.user.id;
+    }
+    
+    const students = await Student.find(query).populate('facultyId', 'name email');
     res.json(students);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -23,7 +28,7 @@ exports.createStudent = async (req, res) => {
 
 exports.getStudent = async (req, res) => {
   try {
-    const student = await Student.findById(req.params.id).populate('courseId').populate('classId');
+    const student = await Student.findById(req.params.id).populate('facultyId', 'name email');
     res.json(student);
   } catch (err) {
     res.status(500).json({ error: err.message });
