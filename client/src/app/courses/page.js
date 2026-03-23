@@ -50,41 +50,44 @@ export default function CoursesPage() {
 
   return (
     <DashboardLayout>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2 style={{ color: 'white', margin: 0 }}>Courses</h2>
+      <div className="flex justify-between items-center mb-5">
+        <h2 className="text-white text-xl font-semibold m-0">Courses</h2>
         {user?.role === 'admin' && (
-          <button onClick={() => setShowForm(!showForm)} className="btn btnPrimary">
+          <button onClick={() => setShowForm(!showForm)} className="px-4 py-2 bg-indigo-500 text-white border-none rounded-lg cursor-pointer text-sm transition-opacity hover:opacity-80">
             {showForm ? 'Cancel' : 'Add Course'}
           </button>
         )}
       </div>
 
       {showForm && (
-        <div className="tableContainer" style={{ marginBottom: '20px' }}>
+        <div className="bg-white p-5 rounded-xl shadow-lg mb-5">
           <form onSubmit={handleSubmit}>
-            <div className="formGroup">
-              <label>Course Code</label>
+            <div className="mb-5">
+              <label className="block text-gray-600 text-sm mb-2">Course Code</label>
               <input
                 type="text"
                 value={formData.code}
                 onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-indigo-500"
                 required
               />
             </div>
-            <div className="formGroup">
-              <label>Course Name</label>
+            <div className="mb-5">
+              <label className="block text-gray-600 text-sm mb-2">Course Name</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-indigo-500"
                 required
               />
             </div>
-            <div className="formGroup">
-              <label>Program</label>
+            <div className="mb-5">
+              <label className="block text-gray-600 text-sm mb-2">Program</label>
               <select
                 value={formData.programId}
                 onChange={(e) => setFormData({ ...formData, programId: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-indigo-500 bg-white"
                 required
               >
                 <option value="">Select Program</option>
@@ -93,59 +96,63 @@ export default function CoursesPage() {
                 ))}
               </select>
             </div>
-            <div className="formGroup">
-              <label>Credits</label>
+            <div className="mb-5">
+              <label className="block text-gray-600 text-sm mb-2">Credits</label>
               <input
                 type="number"
                 value={formData.credits}
                 onChange={(e) => setFormData({ ...formData, credits: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-indigo-500"
                 min="1"
                 max="6"
               />
             </div>
-            <div className="formGroup">
-              <label>Semester</label>
+            <div className="mb-5">
+              <label className="block text-gray-600 text-sm mb-2">Semester</label>
               <select
                 value={formData.semester}
                 onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-indigo-500 bg-white"
               >
                 <option value={1}>Semester 1</option>
                 <option value={2}>Semester 2</option>
               </select>
             </div>
-            <div className="formGroup">
-              <label>Description</label>
+            <div className="mb-5">
+              <label className="block text-gray-600 text-sm mb-2">Description</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows="3"
-                style={{ width: '100%', padding: '10px', backgroundColor: '#333', color: 'white', border: '1px solid #555', borderRadius: '4px' }}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-indigo-500 bg-gray-800 text-white"
               />
             </div>
-            <button type="submit" className="btn btnSuccess">Create Course</button>
+            <button type="submit" className="px-4 py-2 bg-green-500 text-white border-none rounded-lg cursor-pointer text-sm transition-opacity hover:opacity-80">
+              Create Course
+            </button>
           </form>
         </div>
       )}
 
-      <div className="tableContainer">
-        <table>
+      <div className="bg-white p-5 rounded-xl shadow-lg overflow-x-auto">
+        <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th>Code</th>
-              <th>Name</th>
-              <th>Program</th>
-              <th>Credits</th>
-              <th>Semester</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Code</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Name</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Program</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Credits</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Semester</th>
             </tr>
           </thead>
           <tbody>
             {courses.map((course) => (
-              <tr key={course._id}>
-                <td>{course.code}</td>
-                <td>{course.name}</td>
-                <td>{course.programId?.name || 'N/A'}</td>
-                <td>{course.credits}</td>
-                <td>{course.semester}</td>
+              <tr key={course._id} className="border-b border-gray-100">
+                <td className="p-3">{course.code}</td>
+                <td className="p-3">{course.name}</td>
+                <td className="p-3">{course.programId?.name || 'N/A'}</td>
+                <td className="p-3">{course.credits}</td>
+                <td className="p-3">{course.semester}</td>
               </tr>
             ))}
           </tbody>

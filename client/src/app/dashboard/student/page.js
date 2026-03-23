@@ -47,12 +47,12 @@ export default function StudentDashboard() {
     }
   };
 
-  if (loading) return <DashboardLayout><p>Loading...</p></DashboardLayout>;
+  if (loading) return <DashboardLayout><p className="text-white">Loading...</p></DashboardLayout>;
 
   if (error) {
     return (
       <DashboardLayout>
-        <div className="error" style={{ padding: '20px', margin: '20px' }}>{error}</div>
+        <div className="text-red-500 p-5 m-5">{error}</div>
       </DashboardLayout>
     );
   }
@@ -60,88 +60,86 @@ export default function StudentDashboard() {
   if (!studentProfile) {
     return (
       <DashboardLayout>
-        <p style={{ color: 'white', padding: '20px' }}>Your student profile has not been created yet. Please contact the administrator.</p>
+        <p className="text-white p-5">Your student profile has not been created yet. Please contact the administrator.</p>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout>
-      <div className="tableContainer" style={{ marginBottom: '20px' }}>
-        <h2 style={{ color: 'white', marginBottom: '15px' }}>My Profile</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+      <div className="bg-white p-5 rounded-xl shadow-lg mb-5">
+        <h2 className="text-gray-800 text-xl font-semibold mb-4">My Profile</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <p style={{ color: '#888', margin: '0', fontSize: '12px' }}>Name</p>
-            <p style={{ color: 'white', margin: '5px 0 0 0', fontSize: '16px' }}>{user?.name}</p>
+            <p className="text-gray-500 m-0 text-xs">Name</p>
+            <p className="text-white m-0 mt-1 text-base">{user?.name}</p>
           </div>
           <div>
-            <p style={{ color: '#888', margin: '0', fontSize: '12px' }}>Email</p>
-            <p style={{ color: 'white', margin: '5px 0 0 0', fontSize: '16px' }}>{user?.email}</p>
+            <p className="text-gray-500 m-0 text-xs">Email</p>
+            <p className="text-white m-0 mt-1 text-base">{user?.email}</p>
           </div>
           <div>
-            <p style={{ color: '#888', margin: '0', fontSize: '12px' }}>Student ID</p>
-            <p style={{ color: 'white', margin: '5px 0 0 0', fontSize: '16px' }}>{studentProfile.studentId}</p>
+            <p className="text-gray-500 m-0 text-xs">Student ID</p>
+            <p className="text-white m-0 mt-1 text-base">{studentProfile.studentId}</p>
           </div>
           <div>
-            <p style={{ color: '#888', margin: '0', fontSize: '12px' }}>Program</p>
-            <p style={{ color: 'white', margin: '5px 0 0 0', fontSize: '16px' }}>
-              {studentProfile.programId?.name || 'N/A'}
-            </p>
+            <p className="text-gray-500 m-0 text-xs">Program</p>
+            <p className="text-white m-0 mt-1 text-base">{studentProfile.programId?.name || 'N/A'}</p>
           </div>
           <div>
-            <p style={{ color: '#888', margin: '0', fontSize: '12px' }}>Level</p>
-            <p style={{ color: 'white', margin: '5px 0 0 0', fontSize: '16px' }}>Level {studentProfile.level}</p>
+            <p className="text-gray-500 m-0 text-xs">Level</p>
+            <p className="text-white m-0 mt-1 text-base">Level {studentProfile.level}</p>
           </div>
           <div>
-            <p style={{ color: '#888', margin: '0', fontSize: '12px' }}>Semester</p>
-            <p style={{ color: 'white', margin: '5px 0 0 0', fontSize: '16px' }}>
+            <p className="text-gray-500 m-0 text-xs">Semester</p>
+            <p className="text-white m-0 mt-1 text-base">
               Semester {studentProfile.semester}, {studentProfile.academicYear}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="stats">
-        <div className="statCard">
-          <h3>Enrolled Classes</h3>
-          <div className="value">{classes.length}</div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        <div className="bg-white p-6 rounded-xl shadow-lg">
+          <h3 className="text-gray-500 text-sm m-0 mb-2">Enrolled Classes</h3>
+          <div className="text-4xl font-bold text-indigo-500">{classes.length}</div>
         </div>
       </div>
 
-      <div className="tableContainer">
-        <h2 style={{ color: 'white', marginBottom: '15px' }}>My Classes</h2>
+      <div className="bg-white p-5 rounded-xl shadow-lg overflow-x-auto">
+        <h2 className="text-gray-800 text-xl font-semibold mb-4">My Classes</h2>
         {classes.length > 0 ? (
-          <table>
+          <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th>Course</th>
-                <th>Type</th>
-                <th>Schedule</th>
-                <th>Location</th>
-                <th>Lecturer</th>
-                <th>Action</th>
+                <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Course</th>
+                <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Type</th>
+                <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Schedule</th>
+                <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Location</th>
+                <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Lecturer</th>
+                <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Action</th>
               </tr>
             </thead>
             <tbody>
               {classes.map((cls) => (
-                <tr key={cls._id}>
-                  <td>
-                    <strong>{cls.courseId?.name}</strong>
+                <tr key={cls._id} className="border-b border-gray-100">
+                  <td className="p-3">
+                    <strong className="text-gray-800">{cls.courseId?.name}</strong>
                     <br/>
-                    <small style={{ color: '#888' }}>{cls.courseId?.code}</small>
+                    <span className="text-gray-500 text-sm">{cls.courseId?.code}</span>
                   </td>
-                  <td style={{ textTransform: 'capitalize' }}>{cls.type}</td>
-                  <td>
+                  <td className="p-3 capitalize">{cls.type}</td>
+                  <td className="p-3">
                     {cls.schedule?.day && cls.schedule?.day.charAt(0).toUpperCase() + cls.schedule?.day.slice(1)}
                     <br/>
-                    <small style={{ color: '#888' }}>
+                    <span className="text-gray-500 text-sm">
                       {cls.schedule?.startTime} - {cls.schedule?.endTime}
-                    </small>
+                    </span>
                   </td>
-                  <td>{cls.location || 'N/A'}</td>
-                  <td>{cls.lecturerId?.name || 'N/A'}</td>
-                  <td>
-                    <button onClick={() => markAttendance(cls._id)} className="btn btnSuccess">
+                  <td className="p-3">{cls.location || 'N/A'}</td>
+                  <td className="p-3">{cls.lecturerId?.name || 'N/A'}</td>
+                  <td className="p-3">
+                    <button onClick={() => markAttendance(cls._id)} className="px-4 py-2 bg-green-500 text-white border-none rounded-lg cursor-pointer text-sm transition-opacity hover:opacity-80">
                       Mark Present
                     </button>
                   </td>
@@ -150,7 +148,7 @@ export default function StudentDashboard() {
             </tbody>
           </table>
         ) : (
-          <p style={{ color: '#888', textAlign: 'center', padding: '20px' }}>
+          <p className="text-gray-500 text-center p-5">
             No classes enrolled yet. Please contact the administrator to enroll you in classes.
           </p>
         )}

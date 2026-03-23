@@ -103,36 +103,38 @@ export default function ClassesPage() {
     );
   };
 
-  if (loading) return <DashboardLayout><p>Loading...</p></DashboardLayout>;
+  if (loading) return <DashboardLayout><p className="text-white">Loading...</p></DashboardLayout>;
 
   return (
     <DashboardLayout>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2 style={{ color: 'white', margin: 0 }}>Classes</h2>
+      <div className="flex justify-between items-center mb-5">
+        <h2 className="text-white text-xl font-semibold m-0">Classes</h2>
         {(user?.role === 'admin' || user?.role === 'lecturer') && (
-          <button onClick={() => setShowForm(!showForm)} className="btn btnPrimary">
+          <button onClick={() => setShowForm(!showForm)} className="px-4 py-2 bg-indigo-500 text-white border-none rounded-lg cursor-pointer text-sm transition-opacity hover:opacity-80">
             {showForm ? 'Cancel' : 'Add Class'}
           </button>
         )}
       </div>
 
       {showForm && (
-        <div className="tableContainer" style={{ marginBottom: '20px' }}>
+        <div className="bg-white p-5 rounded-xl shadow-lg mb-5">
           <form onSubmit={handleSubmit}>
-            <div className="formGroup">
-              <label>Class Name</label>
+            <div className="mb-5">
+              <label className="block text-gray-600 text-sm mb-2">Class Name</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-indigo-500"
                 required
               />
             </div>
-            <div className="formGroup">
-              <label>Course</label>
+            <div className="mb-5">
+              <label className="block text-gray-600 text-sm mb-2">Course</label>
               <select
                 value={formData.courseId}
                 onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-indigo-500 bg-white"
                 required
               >
                 <option value="">Select Course</option>
@@ -143,97 +145,105 @@ export default function ClassesPage() {
                 ))}
               </select>
             </div>
-            <div className="formGroup">
-              <label>Type</label>
+            <div className="mb-5">
+              <label className="block text-gray-600 text-sm mb-2">Type</label>
               <select
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-indigo-500 bg-white"
               >
                 <option value="lecture">Lecture</option>
                 <option value="tutorial">Tutorial</option>
                 <option value="lab">Lab</option>
               </select>
             </div>
-            <div className="formGroup">
-              <label>Day</label>
+            <div className="mb-5">
+              <label className="block text-gray-600 text-sm mb-2">Day</label>
               <select
                 value={formData.schedule.day}
                 onChange={(e) => setFormData({ ...formData, schedule: { ...formData.schedule, day: e.target.value } })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-indigo-500 bg-white"
               >
                 {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
                   <option key={day} value={day}>{day.charAt(0).toUpperCase() + day.slice(1)}</option>
                 ))}
               </select>
             </div>
-            <div className="formGroup">
-              <label>Start Time</label>
+            <div className="mb-5">
+              <label className="block text-gray-600 text-sm mb-2">Start Time</label>
               <input
                 type="time"
                 value={formData.schedule.startTime}
                 onChange={(e) => setFormData({ ...formData, schedule: { ...formData.schedule, startTime: e.target.value } })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-indigo-500"
                 required
               />
             </div>
-            <div className="formGroup">
-              <label>End Time</label>
+            <div className="mb-5">
+              <label className="block text-gray-600 text-sm mb-2">End Time</label>
               <input
                 type="time"
                 value={formData.schedule.endTime}
                 onChange={(e) => setFormData({ ...formData, schedule: { ...formData.schedule, endTime: e.target.value } })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-indigo-500"
                 required
               />
             </div>
-            <div className="formGroup">
-              <label>Location</label>
+            <div className="mb-5">
+              <label className="block text-gray-600 text-sm mb-2">Location</label>
               <input
                 type="text"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-indigo-500"
               />
             </div>
-            <button type="submit" className="btn btnSuccess">Create Class</button>
+            <button type="submit" className="px-4 py-2 bg-green-500 text-white border-none rounded-lg cursor-pointer text-sm transition-opacity hover:opacity-80">
+              Create Class
+            </button>
           </form>
         </div>
       )}
 
-      <div className="tableContainer">
-        <table>
+      <div className="bg-white p-5 rounded-xl shadow-lg overflow-x-auto">
+        <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th>Course</th>
-              <th>Type</th>
-              <th>Schedule</th>
-              <th>Location</th>
-              <th>Lecturer</th>
-              <th>Enrolled</th>
-              {(user?.role === 'admin' || user?.role === 'lecturer') && <th>Actions</th>}
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Course</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Type</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Schedule</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Location</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Lecturer</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Enrolled</th>
+              {(user?.role === 'admin' || user?.role === 'lecturer') && (
+                <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Actions</th>
+              )}
             </tr>
           </thead>
           <tbody>
             {classes.map((cls) => (
-              <tr key={cls._id}>
-                <td>
-                  <strong>{cls.courseId?.name}</strong>
+              <tr key={cls._id} className="border-b border-gray-100">
+                <td className="p-3">
+                  <strong className="text-gray-800">{cls.courseId?.name}</strong>
                   <br/>
-                  <small style={{ color: '#888' }}>{cls.courseId?.code}</small>
+                  <span className="text-gray-500 text-sm">{cls.courseId?.code}</span>
                 </td>
-                <td style={{ textTransform: 'capitalize' }}>{cls.type}</td>
-                <td>
+                <td className="p-3 capitalize">{cls.type}</td>
+                <td className="p-3">
                   {cls.schedule?.day && cls.schedule?.day.charAt(0).toUpperCase() + cls.schedule?.day.slice(1)}
                   <br/>
-                  <small style={{ color: '#888' }}>
+                  <span className="text-gray-500 text-sm">
                     {cls.schedule?.startTime} - {cls.schedule?.endTime}
-                  </small>
+                  </span>
                 </td>
-                <td>{cls.location || 'N/A'}</td>
-                <td>{cls.lecturerId?.name || 'N/A'}</td>
-                <td>{getClassEnrollments(cls._id).length}</td>
+                <td className="p-3">{cls.location || 'N/A'}</td>
+                <td className="p-3">{cls.lecturerId?.name || 'N/A'}</td>
+                <td className="p-3">{getClassEnrollments(cls._id).length}</td>
                 {(user?.role === 'admin' || user?.role === 'lecturer') && (
-                  <td>
+                  <td className="p-3">
                     <button 
                       onClick={() => { setSelectedClass(cls); setShowEnrollModal(true); }}
-                      className="btn btnPrimary"
-                      style={{ padding: '5px 10px', fontSize: '12px' }}
+                      className="px-3 py-1.5 bg-indigo-500 text-white border-none rounded cursor-pointer text-xs transition-opacity hover:opacity-80"
                     >
                       Manage Enrollment
                     </button>
@@ -246,36 +256,33 @@ export default function ClassesPage() {
       </div>
 
       {showEnrollModal && selectedClass && (
-        <div className="modalOverlay" style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.7)',
-          display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
-        }}>
-          <div className="modalContent" style={{
-            background: '#1a1a1a', padding: '20px', borderRadius: '8px',
-            width: '700px', maxHeight: '80vh', overflowY: 'auto'
-          }}>
-            <h3 style={{ color: 'white', marginBottom: '20px' }}>
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+          <div className="bg-gray-800 p-5 rounded-lg w-[700px] max-h-[80vh] overflow-y-auto">
+            <h3 className="text-white text-lg font-semibold mb-5">
               Manage Enrollment - {selectedClass.courseId?.code}
             </h3>
             
-            <h4 style={{ color: '#4ade80', marginBottom: '10px' }}>Enrolled Students</h4>
+            <h4 className="text-green-400 text-sm font-semibold mb-2.5">Enrolled Students</h4>
             {getClassEnrollments(selectedClass._id).length > 0 ? (
-              <table style={{ width: '100%', marginBottom: '20px' }}>
+              <table className="w-full mb-5">
                 <thead>
-                  <tr><th>ID</th><th>Name</th><th>Program</th><th>Action</th></tr>
+                  <tr>
+                    <th className="text-left p-2 border-b">ID</th>
+                    <th className="text-left p-2 border-b">Name</th>
+                    <th className="text-left p-2 border-b">Program</th>
+                    <th className="text-left p-2 border-b">Action</th>
+                  </tr>
                 </thead>
                 <tbody>
                   {getClassEnrollments(selectedClass._id).map((enroll) => (
-                    <tr key={enroll._id}>
-                      <td>{enroll.studentId?.studentId}</td>
-                      <td>{enroll.studentId?.name}</td>
-                      <td>{enroll.studentId?.programId?.name}</td>
-                      <td>
+                    <tr key={enroll._id} className="border-b border-gray-700">
+                      <td className="p-2 text-gray-300">{enroll.studentId?.studentId}</td>
+                      <td className="p-2 text-gray-300">{enroll.studentId?.name}</td>
+                      <td className="p-2 text-gray-300">{enroll.studentId?.programId?.name}</td>
+                      <td className="p-2">
                         <button 
                           onClick={() => handleUnenroll(enroll.studentId._id)}
-                          className="btn btnDanger"
-                          style={{ padding: '5px 10px', fontSize: '12px' }}
+                          className="px-3 py-1 bg-red-500 text-white border-none rounded cursor-pointer text-xs transition-opacity hover:opacity-80"
                         >
                           Remove
                         </button>
@@ -285,26 +292,30 @@ export default function ClassesPage() {
                 </tbody>
               </table>
             ) : (
-              <p style={{ color: '#888', marginBottom: '20px' }}>No students enrolled</p>
+              <p className="text-gray-500 mb-5">No students enrolled</p>
             )}
 
-            <h4 style={{ color: '#4ade80', marginBottom: '10px' }}>Add Students</h4>
+            <h4 className="text-green-400 text-sm font-semibold mb-2.5">Add Students</h4>
             {getUnenrolledStudents(selectedClass._id).length > 0 ? (
-              <table style={{ width: '100%' }}>
+              <table className="w-full">
                 <thead>
-                  <tr><th>ID</th><th>Name</th><th>Program</th><th>Action</th></tr>
+                  <tr>
+                    <th className="text-left p-2 border-b">ID</th>
+                    <th className="text-left p-2 border-b">Name</th>
+                    <th className="text-left p-2 border-b">Program</th>
+                    <th className="text-left p-2 border-b">Action</th>
+                  </tr>
                 </thead>
                 <tbody>
                   {getUnenrolledStudents(selectedClass._id).map((student) => (
-                    <tr key={student._id}>
-                      <td>{student.studentId}</td>
-                      <td>{student.name}</td>
-                      <td>{student.programId?.name}</td>
-                      <td>
+                    <tr key={student._id} className="border-b border-gray-700">
+                      <td className="p-2 text-gray-300">{student.studentId}</td>
+                      <td className="p-2 text-gray-300">{student.name}</td>
+                      <td className="p-2 text-gray-300">{student.programId?.name}</td>
+                      <td className="p-2">
                         <button 
                           onClick={() => handleEnroll(student._id)}
-                          className="btn btnSuccess"
-                          style={{ padding: '5px 10px', fontSize: '12px' }}
+                          className="px-3 py-1 bg-green-500 text-white border-none rounded cursor-pointer text-xs transition-opacity hover:opacity-80"
                         >
                           Enroll
                         </button>
@@ -314,13 +325,12 @@ export default function ClassesPage() {
                 </tbody>
               </table>
             ) : (
-              <p style={{ color: '#888' }}>No eligible students available</p>
+              <p className="text-gray-500">No eligible students available</p>
             )}
 
             <button 
               onClick={() => { setShowEnrollModal(false); setSelectedClass(null); }}
-              className="btn btnDanger"
-              style={{ marginTop: '20px' }}
+              className="mt-5 px-4 py-2 bg-red-500 text-white border-none rounded-lg cursor-pointer text-sm transition-opacity hover:opacity-80"
             >
               Close
             </button>
