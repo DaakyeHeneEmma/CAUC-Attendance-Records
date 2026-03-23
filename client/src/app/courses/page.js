@@ -39,12 +39,16 @@ export default function CoursesPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/structure/courses', formData);
+      const token = localStorage.getItem('token');
+      await axios.post('/api/structure/courses', formData, {
+        headers: { 'x-auth-token': token }
+      });
       setShowForm(false);
       setFormData({ code: '', name: '', description: '', programId: '', credits: 3, semester: 1 });
       fetchData();
     } catch (err) {
-      alert('Failed to create course');
+      console.error('Create course error:', err.response?.data || err.message);
+      alert(err.response?.data?.error || 'Failed to create course');
     }
   };
 
@@ -52,7 +56,7 @@ export default function CoursesPage() {
     <DashboardLayout>
       <div className="flex justify-between items-center mb-5">
         <h2 className="text-white text-xl font-semibold m-0">Courses</h2>
-        {user?.role === 'admin' && (
+        {(user?.role === 'admin' || user?.role === 'lecturer') && (
           <button onClick={() => setShowForm(!showForm)} className="px-4 py-2 bg-indigo-500 text-white border-none rounded-lg cursor-pointer text-sm transition-opacity hover:opacity-80">
             {showForm ? 'Cancel' : 'Add Course'}
           </button>

@@ -295,6 +295,13 @@ exports.seedData = async (req, res) => {
       departmentId: department._id,
       level: 'Degree',
       duration: 4
+    },
+    {
+      name: 'BSc Information Technology',
+      code: 'CS-ICT',
+      departmentId: department._id,
+      level: 'Degree',
+      duration: 4
     });
     await program.save();
 

@@ -16,6 +16,8 @@ export default function ClassesPage() {
   const [selectedClass, setSelectedClass] = useState(null);
   const [enrolledStudents, setEnrolledStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filterLevel, setFilterLevel] = useState('');
+  const [filterProgram, setFilterProgram] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     courseId: '',
@@ -54,7 +56,10 @@ export default function ClassesPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/structure/classes', formData);
+      const token = localStorage.getItem('token');
+      await axios.post('/api/structure/classes', formData, {
+        headers: { 'x-auth-token': token }
+      });
       setShowForm(false);
       setFormData({
         name: '', courseId: '', type: 'lecture', semester: 1, academicYear: '2024/2025',
@@ -62,7 +67,8 @@ export default function ClassesPage() {
       });
       fetchData();
     } catch (err) {
-      alert('Failed to create class');
+      console.error('Create class error:', err.response?.data || err.message);
+      alert(err.response?.data?.error || 'Failed to create class');
     }
   };
 
@@ -97,10 +103,12 @@ export default function ClassesPage() {
     const classItem = classes.find(c => c._id === classId);
     if (!classItem) return [];
     
-    return students.filter(s => 
-      s.programId?._id === classItem.courseId?.programId?._id &&
-      !enrolledIds.includes(s._id)
-    );
+    const classProgramId = String(classItem.courseId?.programId?._id || classItem.courseId?.programId || '');
+    
+    return students.filter(s => {
+      const studentProgramId = String(s.programId?._id || s.programId || '');
+      return studentProgramId === classProgramId && studentProgramId !== '' && !enrolledIds.includes(s._id);
+    });
   };
 
   if (loading) return <DashboardLayout><p className="text-white">Loading...</p></DashboardLayout>;
@@ -296,40 +304,83 @@ export default function ClassesPage() {
             )}
 
             <h4 className="text-green-400 text-sm font-semibold mb-2.5">Add Students</h4>
-            {getUnenrolledStudents(selectedClass._id).length > 0 ? (
-              <table className="w-full">
-                <thead>
-                  <tr>
-                    <th className="text-left p-2 border-b">ID</th>
-                    <th className="text-left p-2 border-b">Name</th>
-                    <th className="text-left p-2 border-b">Program</th>
-                    <th className="text-left p-2 border-b">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {getUnenrolledStudents(selectedClass._id).map((student) => (
-                    <tr key={student._id} className="border-b border-gray-700">
-                      <td className="p-2 text-gray-300">{student.studentId}</td>
-                      <td className="p-2 text-gray-300">{student.name}</td>
-                      <td className="p-2 text-gray-300">{student.programId?.name}</td>
-                      <td className="p-2">
-                        <button 
-                          onClick={() => handleEnroll(student._id)}
-                          className="px-3 py-1 bg-green-500 text-white border-none rounded cursor-pointer text-xs transition-opacity hover:opacity-80"
-                        >
-                          Enroll
-                        </button>
-                      </td>
-                    </tr>
+            
+            <div className="mb-3 flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2">
+                <label className="text-gray-400 text-sm">Program:</label>
+                <select 
+                  value={filterProgram} 
+                  onChange={(e) => setFilterProgram(e.target.value)}
+                  className="px-3 py-1.5 bg-gray-700 text-white border border-gray-600 rounded text-sm"
+                >
+                  <option value="">All Programs</option>
+                  {programs.map((prog) => (
+                    <option key={prog._id} value={prog._id}>{prog.name}</option>
                   ))}
-                </tbody>
-              </table>
-            ) : (
-              <p className="text-gray-500">No eligible students available</p>
-            )}
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-gray-400 text-sm">Level:</label>
+                <select 
+                  value={filterLevel} 
+                  onChange={(e) => setFilterLevel(e.target.value)}
+                  className="px-3 py-1.5 bg-gray-700 text-white border border-gray-600 rounded text-sm"
+                >
+                  <option value="">All Levels</option>
+                  <option value="100">100</option>
+                  <option value="200">200</option>
+                  <option value="300">300</option>
+                  <option value="400">400</option>
+                </select>
+              </div>
+            </div>
+
+            {(() => {
+              let eligibleStudents = getUnenrolledStudents(selectedClass._id);
+              if (filterProgram) {
+                eligibleStudents = eligibleStudents.filter(s => s.programId?._id === filterProgram);
+              }
+              if (filterLevel) {
+                eligibleStudents = eligibleStudents.filter(s => s.level === parseInt(filterLevel));
+              }
+              
+              return eligibleStudents.length > 0 ? (
+                <table className="w-full">
+                  <thead>
+                    <tr>
+                      <th className="text-left p-2 border-b">ID</th>
+                      <th className="text-left p-2 border-b">Name</th>
+                      <th className="text-left p-2 border-b">Program</th>
+                      <th className="text-left p-2 border-b">Level</th>
+                      <th className="text-left p-2 border-b">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {eligibleStudents.map((student) => (
+                      <tr key={student._id} className="border-b border-gray-700">
+                        <td className="p-2 text-gray-300">{student.studentId}</td>
+                        <td className="p-2 text-gray-300">{student.name}</td>
+                        <td className="p-2 text-gray-300">{student.programId?.name || 'N/A'}</td>
+                        <td className="p-2 text-gray-300">Level {student.level}</td>
+                        <td className="p-2">
+                          <button 
+                            onClick={() => handleEnroll(student._id)}
+                            className="px-3 py-1 bg-green-500 text-white border-none rounded cursor-pointer text-xs transition-opacity hover:opacity-80"
+                          >
+                            Enroll
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="text-gray-500">No eligible students available</p>
+              );
+            })()}
 
             <button 
-              onClick={() => { setShowEnrollModal(false); setSelectedClass(null); }}
+              onClick={() => { setShowEnrollModal(false); setSelectedClass(null); setFilterLevel(''); setFilterProgram(''); }}
               className="mt-5 px-4 py-2 bg-red-500 text-white border-none rounded-lg cursor-pointer text-sm transition-opacity hover:opacity-80"
             >
               Close

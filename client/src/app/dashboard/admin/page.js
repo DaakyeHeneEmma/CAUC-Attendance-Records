@@ -9,21 +9,27 @@ export default function AdminDashboard() {
   const [faculties, setFaculties] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [programs, setPrograms] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [lecturers, setLecturers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [statsRes, facultiesRes, deptsRes, progsRes] = await Promise.all([
+        const [statsRes, facultiesRes, deptsRes, progsRes, studentRes, lecturerRes] = await Promise.all([
           axios.get('/api/attendance/stats'),
           axios.get('/api/structure/faculties'),
           axios.get('/api/structure/departments'),
-          axios.get('/api/structure/programs')
+          axios.get('/api/structure/programs'),
+          axios.get('/api/structure/students'),
+          axios.get('/api/auth/lecturers')
         ]);
         setStats(statsRes.data);
         setFaculties(facultiesRes.data);
         setDepartments(deptsRes.data);
         setPrograms(progsRes.data);
+        setStudents(studentRes.data);
+        setLecturers(lecturerRes.data);
       } catch (err) {
         console.error(err);
       } finally {
@@ -114,6 +120,60 @@ export default function AdminDashboard() {
                 <td className="p-3">{prog.name}</td>
                 <td className="p-3">{prog.level}</td>
                 <td className="p-3">{prog.departmentId?.name || 'N/A'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="bg-white p-5 rounded-xl shadow-lg overflow-x-auto mt-5">
+        <h2 className="text-gray-800 text-xl font-semibold mb-4">Students</h2>
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Student ID</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Name</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Email</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Program</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Level</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Semester</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Academic Year</th>
+            </tr>
+          </thead>
+          <tbody>
+            {students.map((student) => (
+              <tr key={student._id} className="border-b border-gray-100">
+                <td className="p-3">{student.studentId}</td>
+                <td className="p-3">{student.name}</td>
+                <td className="p-3">{student.email}</td>
+                <td className="p-3">{student.programId?.name || 'N/A'}</td>
+                <td className="p-3">{student.level}</td>
+                <td className="p-3">{student.semester}</td>
+                <td className="p-3">{student.academicYear}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="bg-white p-5 rounded-xl shadow-lg overflow-x-auto mt-5">
+        <h2 className="text-gray-800 text-xl font-semibold mb-4">Lecturers</h2>
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Staff ID</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Name</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Email</th>
+              <th className="p-3 text-left border-b border-gray-200 bg-gray-50 font-semibold">Department</th>
+            </tr>
+          </thead>
+          <tbody>
+            {lecturers.map((lecturer) => (
+              <tr key={lecturer._id} className="border-b border-gray-100">
+                <td className="p-3">{lecturer.staffId}</td>
+                <td className="p-3">{lecturer.name}</td>
+                <td className="p-3">{lecturer.email}</td>
+                <td className="p-3">{lecturer.departmentId?.name || 'N/A'}</td>
               </tr>
             ))}
           </tbody>
