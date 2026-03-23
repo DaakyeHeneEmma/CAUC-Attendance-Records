@@ -72,27 +72,27 @@ export default function StudentDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
             <p className="text-gray-500 m-0 text-xs">Name</p>
-            <p className="text-white m-0 mt-1 text-base">{user?.name}</p>
+            <p className="text-black m-0 mt-1 text-base">{user?.name}</p>
           </div>
           <div>
             <p className="text-gray-500 m-0 text-xs">Email</p>
-            <p className="text-white m-0 mt-1 text-base">{user?.email}</p>
+            <p className="text-black m-0 mt-1 text-base">{user?.email}</p>
           </div>
           <div>
             <p className="text-gray-500 m-0 text-xs">Student ID</p>
-            <p className="text-white m-0 mt-1 text-base">{studentProfile.studentId}</p>
+            <p className="text-black m-0 mt-1 text-base">{studentProfile.studentId}</p>
           </div>
           <div>
             <p className="text-gray-500 m-0 text-xs">Program</p>
-            <p className="text-white m-0 mt-1 text-base">{studentProfile.programId?.name || 'N/A'}</p>
+            <p className="text-black m-0 mt-1 text-base">{studentProfile.programId?.name || 'N/A'}</p>
           </div>
           <div>
             <p className="text-gray-500 m-0 text-xs">Level</p>
-            <p className="text-white m-0 mt-1 text-base">Level {studentProfile.level}</p>
+            <p className="text-black m-0 mt-1 text-base">Level {studentProfile.level}</p>
           </div>
           <div>
             <p className="text-gray-500 m-0 text-xs">Semester</p>
-            <p className="text-white m-0 mt-1 text-base">
+            <p className="text-black m-0 mt-1 text-base">
               Semester {studentProfile.semester}, {studentProfile.academicYear}
             </p>
           </div>

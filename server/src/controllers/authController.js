@@ -13,15 +13,19 @@ exports.register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    user = new User({
+    const userData = {
       email,
       password: hashedPassword,
       name,
-      role: role || 'student',
-      staffId,
-      departmentId
-    });
+      role: role || 'student'
+    };
 
+    if (role === 'lecturer') {
+      userData.staffId = staffId;
+      userData.departmentId = departmentId;
+    }
+
+    user = new User(userData);
     await user.save();
 
     if (user.role === 'student' && studentId && programId) {
