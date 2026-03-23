@@ -4,8 +4,7 @@ const cors = require('cors');
 const dbConnection = require('./config/db');
 
 const authRoutes = require('./routes/auth');
-const studentRoutes = require('./routes/students');
-const courseRoutes = require('./routes/courses');
+const structureRoutes = require('./routes/structure');
 const attendanceRoutes = require('./routes/attendance');
 
 const app = express();
@@ -16,8 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
-app.use('/api/students', studentRoutes);
-app.use('/api', courseRoutes);
+app.use('/api/structure', structureRoutes);
 app.use('/api/attendance', attendanceRoutes);
 
 const PORT = process.env.PORT || 5000;

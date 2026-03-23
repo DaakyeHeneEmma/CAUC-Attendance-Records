@@ -13,23 +13,33 @@ export default function Register() {
     email: '',
     password: '',
     role: 'student',
+    staffId: '',
+    departmentId: '',
     studentId: '',
-    facultyId: ''
+    programId: '',
+    level: 100,
+    semester: 1,
+    academicYear: '2024/2025'
   });
-  const [faculties, setFaculties] = useState([]);
+  const [programs, setPrograms] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [error, setError] = useState('');
   const router = useRouter();
 
   useEffect(() => {
-    const fetchFaculties = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get('/api/auth/faculties');
-        setFaculties(res.data);
+        const [progRes, deptRes] = await Promise.all([
+          axios.get('/api/structure/programs'),
+          axios.get('/api/structure/departments')
+        ]);
+        setPrograms(progRes.data);
+        setDepartments(deptRes.data);
       } catch (err) {
         console.error(err);
       }
     };
-    fetchFaculties();
+    fetchData();
   }, []);
 
   const handleChange = (e) => {
@@ -41,7 +51,7 @@ export default function Register() {
     setError('');
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('/api/auth/register', formData, {
+      await axios.post('/api/auth/register', formData, {
         headers: { 'x-auth-token': token }
       });
       router.push('/');
@@ -90,10 +100,11 @@ export default function Register() {
             <label>Role</label>
             <select name="role" value={formData.role} onChange={handleChange}>
               <option value="student">Student</option>
-              <option value="faculty">Faculty</option>
+              <option value="lecturer">Lecturer</option>
               <option value="admin">Admin</option>
             </select>
           </div>
+          
           {formData.role === 'student' && (
             <>
               <div className="formGroup">
@@ -107,33 +118,77 @@ export default function Register() {
                 />
               </div>
               <div className="formGroup">
-                <label>Faculty</label>
+                <label>Program</label>
                 <select 
-                  name="facultyId" 
-                  value={formData.facultyId} 
+                  name="programId" 
+                  value={formData.programId} 
                   onChange={handleChange}
                   required
                 >
-                  <option value="">Select Faculty</option>
-                  {faculties.map((faculty) => (
-                    <option key={faculty._id} value={faculty._id}>{faculty.name}</option>
+                  <option value="">Select Program</option>
+                  {programs.map((prog) => (
+                    <option key={prog._id} value={prog._id}>{prog.name} ({prog.code})</option>
+                  ))}
+                </select>
+              </div>
+              <div className="formGroup">
+                <label>Level</label>
+                <select name="level" value={formData.level} onChange={handleChange}>
+                  <option value={100}>100</option>
+                  <option value={200}>200</option>
+                  <option value={300}>300</option>
+                  <option value={400}>400</option>
+                </select>
+              </div>
+              <div className="formGroup">
+                <label>Semester</label>
+                <select name="semester" value={formData.semester} onChange={handleChange}>
+                  <option value={1}>Semester 1</option>
+                  <option value={2}>Semester 2</option>
+                </select>
+              </div>
+              <div className="formGroup">
+                <label>Academic Year</label>
+                <input
+                  type="text"
+                  name="academicYear"
+                  value={formData.academicYear}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </>
+          )}
+          
+          {formData.role === 'lecturer' && (
+            <>
+              <div className="formGroup">
+                <label>Staff ID</label>
+                <input
+                  type="text"
+                  name="staffId"
+                  value={formData.staffId}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="formGroup">
+                <label>Department</label>
+                <select 
+                  name="departmentId" 
+                  value={formData.departmentId} 
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Department</option>
+                  {departments.map((dept) => (
+                    <option key={dept._id} value={dept._id}>{dept.name} ({dept.code})</option>
                   ))}
                 </select>
               </div>
             </>
           )}
-          {formData.role === 'faculty' && (
-            <div className="formGroup">
-              <label>Faculty ID</label>
-              <input
-                type="text"
-                name="facultyId"
-                value={formData.facultyId}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          )}
+          
           <button type="submit" className="loginBtn">Register</button>
         </form>
         <p style={{ textAlign: 'center', marginTop: '20px' }}>

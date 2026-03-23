@@ -5,7 +5,7 @@ const Student = require('../models/Student');
 
 exports.register = async (req, res) => {
   try {
-    const { email, password, name, role, studentId, facultyId } = req.body;
+    const { email, password, name, role, staffId, departmentId, studentId, programId, level, semester, academicYear } = req.body;
     
     let user = await User.findOne({ email });
     if (user) return res.status(400).json({ msg: 'User already exists' });
@@ -18,19 +18,22 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       name,
       role: role || 'student',
-      studentId,
-      facultyId
+      staffId,
+      departmentId
     });
 
     await user.save();
 
-    if (user.role === 'student' && studentId) {
+    if (user.role === 'student' && studentId && programId) {
       const student = new Student({
         userId: user._id,
         studentId,
         name,
         email,
-        facultyId
+        programId,
+        level,
+        semester,
+        academicYear
       });
       await student.save();
     }
@@ -68,10 +71,10 @@ exports.getMe = async (req, res) => {
   }
 };
 
-exports.getFaculties = async (req, res) => {
+exports.getLecturers = async (req, res) => {
   try {
-    const faculties = await User.find({ role: 'faculty' }).select('name email facultyId');
-    res.json(faculties);
+    const lecturers = await User.find({ role: 'lecturer' }).select('name email staffId departmentId');
+    res.json(lecturers);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

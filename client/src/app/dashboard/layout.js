@@ -27,7 +27,12 @@ export default function DashboardLayout({ children }) {
             <Link href="/attendance" className="navLink">Attendance</Link>
             <Link href="/classes" className="navLink">Classes</Link>
             <Link href="/reports" className="navLink">Reports</Link>
-            {(user?.role === 'admin') && <Link href="/register" className="navLink">Register User</Link>}
+            {user?.role === 'admin' && (
+              <>
+                <Link href="/register" className="navLink">Register User</Link>
+                <Link href="/setup" className="navLink">Setup</Link>
+              </>
+            )}
             <button onClick={logout} className="btn btnDanger">Logout</button>
           </nav>
         </header>

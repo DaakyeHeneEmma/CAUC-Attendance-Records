@@ -10,95 +10,106 @@ export default function ClassesPage() {
   const [classes, setClasses] = useState([]);
   const [courses, setCourses] = useState([]);
   const [students, setStudents] = useState([]);
+  const [programs, setPrograms] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [showStudentModal, setShowStudentModal] = useState(false);
+  const [showEnrollModal, setShowEnrollModal] = useState(false);
   const [selectedClass, setSelectedClass] = useState(null);
+  const [enrolledStudents, setEnrolledStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     courseId: '',
+    type: 'lecture',
+    semester: 1,
+    academicYear: '2024/2025',
     schedule: { day: 'monday', startTime: '', endTime: '' },
     location: ''
   });
 
   useEffect(() => {
-    fetchClasses();
-    fetchCourses();
-    fetchStudents();
+    fetchData();
   }, []);
 
-  const fetchClasses = async () => {
+  const fetchData = async () => {
     try {
-      const res = await axios.get('/api/classes');
-      setClasses(res.data);
+      const [classRes, courseRes, studentRes, programRes, enrollRes] = await Promise.all([
+        axios.get('/api/structure/classes'),
+        axios.get('/api/structure/courses'),
+        axios.get('/api/structure/students'),
+        axios.get('/api/structure/programs'),
+        axios.get('/api/structure/enrollments')
+      ]);
+      setClasses(classRes.data);
+      setCourses(courseRes.data);
+      setStudents(studentRes.data);
+      setPrograms(programRes.data);
+      setEnrolledStudents(enrollRes.data);
     } catch (err) {
       console.error(err);
-    }
-  };
-
-  const fetchCourses = async () => {
-    try {
-      const res = await axios.get('/api/courses');
-      setCourses(res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const fetchStudents = async () => {
-    try {
-      const res = await axios.get('/api/students');
-      setStudents(res.data);
-    } catch (err) {
-      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/classes', formData);
+      await axios.post('/api/structure/classes', formData);
       setShowForm(false);
-      setFormData({ name: '', courseId: '', schedule: { day: 'monday', startTime: '', endTime: '' }, location: '' });
-      fetchClasses();
+      setFormData({
+        name: '', courseId: '', type: 'lecture', semester: 1, academicYear: '2024/2025',
+        schedule: { day: 'monday', startTime: '', endTime: '' }, location: ''
+      });
+      fetchData();
     } catch (err) {
       alert('Failed to create class');
     }
   };
 
-  const handleAddStudent = async (studentId) => {
+  const handleEnroll = async (studentId) => {
     try {
-      const res = await axios.post(`/api/classes/${selectedClass._id}/students`, { studentId });
-      setSelectedClass(res.data);
-      fetchClasses();
+      await axios.post('/api/structure/enroll', {
+        classId: selectedClass._id,
+        studentId
+      });
+      fetchData();
+      alert('Student enrolled successfully');
     } catch (err) {
-      alert(err.response?.data?.msg || 'Failed to add student');
+      alert(err.response?.data?.msg || 'Failed to enroll student');
     }
   };
 
-  const handleRemoveStudent = async (studentId) => {
+  const handleUnenroll = async (studentId) => {
     try {
-      const res = await axios.delete(`/api/classes/${selectedClass._id}/students/${studentId}`);
-      setSelectedClass(res.data);
-      fetchClasses();
+      await axios.delete(`/api/structure/enroll/${studentId}/${selectedClass._id}`);
+      fetchData();
     } catch (err) {
-      alert('Failed to remove student');
+      alert('Failed to unenroll student');
     }
   };
 
-  const openAddStudentModal = (cls) => {
-    setSelectedClass(cls);
-    setShowStudentModal(true);
+  const getClassEnrollments = (classId) => {
+    return enrolledStudents.filter(e => e.classId._id === classId);
   };
 
-  const availableStudents = selectedClass
-    ? students.filter(s => !selectedClass.students.some(st => st._id === s._id))
-    : [];
+  const getUnenrolledStudents = (classId) => {
+    const enrolledIds = getClassEnrollments(classId).map(e => e.studentId._id);
+    const classItem = classes.find(c => c._id === classId);
+    if (!classItem) return [];
+    
+    return students.filter(s => 
+      s.programId?._id === classItem.courseId?.programId?._id &&
+      !enrolledIds.includes(s._id)
+    );
+  };
+
+  if (loading) return <DashboardLayout><p>Loading...</p></DashboardLayout>;
 
   return (
     <DashboardLayout>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h2 style={{ color: 'white', margin: 0 }}>Classes</h2>
-        {(user?.role === 'admin' || user?.role === 'faculty') && (
+        {(user?.role === 'admin' || user?.role === 'lecturer') && (
           <button onClick={() => setShowForm(!showForm)} className="btn btnPrimary">
             {showForm ? 'Cancel' : 'Add Class'}
           </button>
@@ -126,8 +137,21 @@ export default function ClassesPage() {
               >
                 <option value="">Select Course</option>
                 {courses.map((course) => (
-                  <option key={course._id} value={course._id}>{course.name}</option>
+                  <option key={course._id} value={course._id}>
+                    {course.code} - {course.name}
+                  </option>
                 ))}
+              </select>
+            </div>
+            <div className="formGroup">
+              <label>Type</label>
+              <select
+                value={formData.type}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+              >
+                <option value="lecture">Lecture</option>
+                <option value="tutorial">Tutorial</option>
+                <option value="lab">Lab</option>
               </select>
             </div>
             <div className="formGroup">
@@ -176,28 +200,42 @@ export default function ClassesPage() {
         <table>
           <thead>
             <tr>
-              <th>Class Name</th>
               <th>Course</th>
+              <th>Type</th>
               <th>Schedule</th>
               <th>Location</th>
-              <th>Faculty</th>
-              <th>Students</th>
-              {(user?.role === 'admin' || user?.role === 'faculty') && <th>Actions</th>}
+              <th>Lecturer</th>
+              <th>Enrolled</th>
+              {(user?.role === 'admin' || user?.role === 'lecturer') && <th>Actions</th>}
             </tr>
           </thead>
           <tbody>
             {classes.map((cls) => (
               <tr key={cls._id}>
-                <td>{cls.name}</td>
-                <td>{cls.courseId?.name}</td>
-                <td>{cls.schedule?.day} {cls.schedule?.startTime} - {cls.schedule?.endTime}</td>
+                <td>
+                  <strong>{cls.courseId?.name}</strong>
+                  <br/>
+                  <small style={{ color: '#888' }}>{cls.courseId?.code}</small>
+                </td>
+                <td style={{ textTransform: 'capitalize' }}>{cls.type}</td>
+                <td>
+                  {cls.schedule?.day && cls.schedule?.day.charAt(0).toUpperCase() + cls.schedule?.day.slice(1)}
+                  <br/>
+                  <small style={{ color: '#888' }}>
+                    {cls.schedule?.startTime} - {cls.schedule?.endTime}
+                  </small>
+                </td>
                 <td>{cls.location || 'N/A'}</td>
-                <td>{cls.facultyId?.name || 'N/A'}</td>
-                <td>{cls.students?.length || 0}</td>
-                {(user?.role === 'admin' || user?.role === 'faculty') && (
+                <td>{cls.lecturerId?.name || 'N/A'}</td>
+                <td>{getClassEnrollments(cls._id).length}</td>
+                {(user?.role === 'admin' || user?.role === 'lecturer') && (
                   <td>
-                    <button onClick={() => openAddStudentModal(cls)} className="btn btnPrimary" style={{ padding: '5px 10px', fontSize: '12px' }}>
-                      Manage Students
+                    <button 
+                      onClick={() => { setSelectedClass(cls); setShowEnrollModal(true); }}
+                      className="btn btnPrimary"
+                      style={{ padding: '5px 10px', fontSize: '12px' }}
+                    >
+                      Manage Enrollment
                     </button>
                   </td>
                 )}
@@ -207,45 +245,38 @@ export default function ClassesPage() {
         </table>
       </div>
 
-      {showStudentModal && selectedClass && (
+      {showEnrollModal && selectedClass && (
         <div className="modalOverlay" style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           backgroundColor: 'rgba(0,0,0,0.7)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
+          display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
         }}>
           <div className="modalContent" style={{
-            background: '#1a1a1a',
-            padding: '20px',
-            borderRadius: '8px',
-            width: '600px',
-            maxHeight: '80vh',
-            overflowY: 'auto'
+            background: '#1a1a1a', padding: '20px', borderRadius: '8px',
+            width: '700px', maxHeight: '80vh', overflowY: 'auto'
           }}>
-            <h3 style={{ color: 'white', marginBottom: '20px' }}>Manage Students - {selectedClass.name}</h3>
+            <h3 style={{ color: 'white', marginBottom: '20px' }}>
+              Manage Enrollment - {selectedClass.courseId?.code}
+            </h3>
             
-            <h4 style={{ color: '#4ade80', marginBottom: '10px' }}>Current Students</h4>
-            {selectedClass.students?.length > 0 ? (
+            <h4 style={{ color: '#4ade80', marginBottom: '10px' }}>Enrolled Students</h4>
+            {getClassEnrollments(selectedClass._id).length > 0 ? (
               <table style={{ width: '100%', marginBottom: '20px' }}>
                 <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Action</th>
-                  </tr>
+                  <tr><th>ID</th><th>Name</th><th>Program</th><th>Action</th></tr>
                 </thead>
                 <tbody>
-                  {selectedClass.students.map((student) => (
-                    <tr key={student._id}>
-                      <td>{student.studentId}</td>
-                      <td>{student.name}</td>
-                      <td>{student.email}</td>
+                  {getClassEnrollments(selectedClass._id).map((enroll) => (
+                    <tr key={enroll._id}>
+                      <td>{enroll.studentId?.studentId}</td>
+                      <td>{enroll.studentId?.name}</td>
+                      <td>{enroll.studentId?.programId?.name}</td>
                       <td>
-                        <button onClick={() => handleRemoveStudent(student._id)} className="btn btnDanger" style={{ padding: '5px 10px', fontSize: '12px' }}>
+                        <button 
+                          onClick={() => handleUnenroll(enroll.studentId._id)}
+                          className="btn btnDanger"
+                          style={{ padding: '5px 10px', fontSize: '12px' }}
+                        >
                           Remove
                         </button>
                       </td>
@@ -258,25 +289,24 @@ export default function ClassesPage() {
             )}
 
             <h4 style={{ color: '#4ade80', marginBottom: '10px' }}>Add Students</h4>
-            {availableStudents.length > 0 ? (
+            {getUnenrolledStudents(selectedClass._id).length > 0 ? (
               <table style={{ width: '100%' }}>
                 <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Action</th>
-                  </tr>
+                  <tr><th>ID</th><th>Name</th><th>Program</th><th>Action</th></tr>
                 </thead>
                 <tbody>
-                  {availableStudents.map((student) => (
+                  {getUnenrolledStudents(selectedClass._id).map((student) => (
                     <tr key={student._id}>
                       <td>{student.studentId}</td>
                       <td>{student.name}</td>
-                      <td>{student.email}</td>
+                      <td>{student.programId?.name}</td>
                       <td>
-                        <button onClick={() => handleAddStudent(student._id)} className="btn btnSuccess" style={{ padding: '5px 10px', fontSize: '12px' }}>
-                          Add
+                        <button 
+                          onClick={() => handleEnroll(student._id)}
+                          className="btn btnSuccess"
+                          style={{ padding: '5px 10px', fontSize: '12px' }}
+                        >
+                          Enroll
                         </button>
                       </td>
                     </tr>
@@ -284,10 +314,14 @@ export default function ClassesPage() {
                 </tbody>
               </table>
             ) : (
-              <p style={{ color: '#888' }}>All students are already enrolled</p>
+              <p style={{ color: '#888' }}>No eligible students available</p>
             )}
 
-            <button onClick={() => { setShowStudentModal(false); setSelectedClass(null); }} className="btn btnDanger" style={{ marginTop: '20px' }}>
+            <button 
+              onClick={() => { setShowEnrollModal(false); setSelectedClass(null); }}
+              className="btn btnDanger"
+              style={{ marginTop: '20px' }}
+            >
               Close
             </button>
           </div>

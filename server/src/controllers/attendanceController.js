@@ -5,7 +5,7 @@ const Student = require('../models/Student');
 
 exports.markAttendance = async (req, res) => {
   try {
-    const { classId, studentId, status } = req.body;
+    const { classId, studentId, status, location } = req.body;
 
     const classItem = await Class.findById(classId);
     if (!classItem) return res.status(404).json({ msg: 'Class not found' });
@@ -13,7 +13,10 @@ exports.markAttendance = async (req, res) => {
     const existingAttendance = await Attendance.findOne({
       studentId,
       classId,
-      date: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) }
+      date: { 
+        $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+        $lt: new Date(new Date().setHours(23, 59, 59, 999))
+      }
     });
 
     if (existingAttendance) {
@@ -27,7 +30,8 @@ exports.markAttendance = async (req, res) => {
       date: new Date(),
       status: status || 'present',
       markedBy: req.user.id,
-      method: 'manual'
+      method: 'manual',
+      location
     });
 
     await attendance.save();
@@ -75,11 +79,11 @@ exports.updateAttendance = async (req, res) => {
 
 exports.getAttendanceReport = async (req, res) => {
   try {
-    const { classId, courseId, startDate, endDate } = req.query;
+    const { classId, studentId, startDate, endDate } = req.query;
 
     let match = {};
     if (classId) match.classId = new mongoose.Types.ObjectId(classId);
-    if (courseId) match.courseId = new mongoose.Types.ObjectId(courseId);
+    if (studentId) match.studentId = new mongoose.Types.ObjectId(studentId);
     if (startDate || endDate) {
       match.date = {};
       if (startDate) match.date.$gte = new Date(startDate);
@@ -92,7 +96,7 @@ exports.getAttendanceReport = async (req, res) => {
         $group: {
           _id: {
             studentId: '$studentId',
-            courseId: '$courseId'
+            classId: '$classId'
           },
           totalPresent: {
             $sum: { $cond: [{ $eq: ['$status', 'present'] }, 1, 0] }
@@ -116,10 +120,10 @@ exports.getAttendanceReport = async (req, res) => {
       },
       {
         $lookup: {
-          from: 'courses',
-          localField: '_id.courseId',
+          from: 'classes',
+          localField: '_id.classId',
           foreignField: '_id',
-          as: 'course'
+          as: 'class'
         }
       }
     ]);
@@ -135,9 +139,11 @@ exports.getStats = async (req, res) => {
     const totalStudents = await Student.countDocuments();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
     const todayAttendance = await Attendance.countDocuments({
-      date: { $gte: today }
+      date: { $gte: today, $lt: tomorrow }
     });
 
     const attendanceRate = totalStudents > 0 
