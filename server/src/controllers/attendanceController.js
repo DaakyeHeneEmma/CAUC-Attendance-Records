@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Attendance = require('../models/Attendance');
 const Class = require('../models/Class');
 const Student = require('../models/Student');
@@ -74,10 +75,11 @@ exports.updateAttendance = async (req, res) => {
 
 exports.getAttendanceReport = async (req, res) => {
   try {
-    const { courseId, startDate, endDate } = req.query;
+    const { classId, courseId, startDate, endDate } = req.query;
 
-    const match = {};
-    if (courseId) match.courseId = courseId;
+    let match = {};
+    if (classId) match.classId = new mongoose.Types.ObjectId(classId);
+    if (courseId) match.courseId = new mongoose.Types.ObjectId(courseId);
     if (startDate || endDate) {
       match.date = {};
       if (startDate) match.date.$gte = new Date(startDate);

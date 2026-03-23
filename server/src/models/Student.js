@@ -5,8 +5,7 @@ const studentSchema = new mongoose.Schema({
   studentId: { type: String, required: true, unique: true },
   name: { type: String, required: true },
   email: { type: String, required: true },
-  course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },
-  classId: { type: mongoose.Schema.Types.ObjectId, ref: 'Class' },
+  facultyId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   createdAt: { type: Date, default: Date.now }
 });
 

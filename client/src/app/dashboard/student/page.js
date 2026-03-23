@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAuth } from '../providers';
+import { useAuth } from '../../providers';
 import axios from 'axios';
 import DashboardLayout from '../layout';
 

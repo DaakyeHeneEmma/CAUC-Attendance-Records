@@ -1,7 +1,7 @@
 import './globals.css';
-import { AuthProvider } from './providers';
+import Providers from './providers-wrapper';
 
-  const metadata = {
+export const metadata = {
   title: 'CAUC Attendance System',
   description: 'University Attendance Management System',
 };
@@ -10,9 +10,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <AuthProvider>
+        <Providers>
           {children}
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   );

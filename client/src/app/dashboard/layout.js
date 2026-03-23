@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../providers';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import axios from 'axios';
 
 export default function DashboardLayout({ children }) {
   const { user, loading, logout } = useAuth();
@@ -28,6 +27,7 @@ export default function DashboardLayout({ children }) {
             <Link href="/attendance" className="navLink">Attendance</Link>
             <Link href="/classes" className="navLink">Classes</Link>
             <Link href="/reports" className="navLink">Reports</Link>
+            {(user?.role === 'admin') && <Link href="/register" className="navLink">Register User</Link>}
             <button onClick={logout} className="btn btnDanger">Logout</button>
           </nav>
         </header>

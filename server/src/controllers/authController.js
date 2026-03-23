@@ -29,7 +29,8 @@ exports.register = async (req, res) => {
         userId: user._id,
         studentId,
         name,
-        email
+        email,
+        facultyId
       });
       await student.save();
     }
@@ -62,6 +63,15 @@ exports.getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
     res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getFaculties = async (req, res) => {
+  try {
+    const faculties = await User.find({ role: 'faculty' }).select('name email facultyId');
+    res.json(faculties);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
