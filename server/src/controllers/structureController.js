@@ -248,12 +248,16 @@ exports.getEnrollments = async (req, res) => {
     const query = classId ? { classId } : {};
     
     const enrollments = await Enrollment.find(query)
-      .populate('studentId', 'name studentId email')
+      .populate('studentId', 'name studentId email programId level')
+      .populate({
+        path: 'studentId',
+        populate: { path: 'programId', select: 'name code' }
+      })
       .populate({
         path: 'classId',
         populate: { 
           path: 'courseId',
-          select: 'name code'
+          select: 'name code programId'
         }
       });
     res.json(enrollments);

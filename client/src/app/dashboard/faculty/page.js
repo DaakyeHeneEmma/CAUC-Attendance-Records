@@ -13,10 +13,13 @@ export default function LecturerDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const classRes = await axios.get('/api/structure/classes');
+        const token = localStorage.getItem('token');
+        const config = { headers: { 'x-auth-token': token } };
+        
+        const classRes = await axios.get('/api/structure/classes', config);
         setClasses(classRes.data);
         
-        const enrollRes = await axios.get('/api/structure/enrollments');
+        const enrollRes = await axios.get('/api/structure/enrollments', config);
         const enrollMap = {};
         enrollRes.data.forEach(e => {
           if (!enrollMap[e.classId._id]) {

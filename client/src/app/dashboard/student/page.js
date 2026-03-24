@@ -15,10 +15,13 @@ export default function StudentDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const classRes = await axios.get('/api/structure/classes');
+        const token = localStorage.getItem('token');
+        const config = { headers: { 'x-auth-token': token } };
+        
+        const classRes = await axios.get('/api/structure/classes', config);
         setClasses(classRes.data);
 
-        const studentRes = await axios.get('/api/structure/students');
+        const studentRes = await axios.get('/api/structure/students', config);
         const student = studentRes.data.find(s => s.userId === user.id);
         setStudentProfile(student);
       } catch (err) {

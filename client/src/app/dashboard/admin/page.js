@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import DashboardLayout from '../layout';
+import { useAuth } from '../../providers';
 
 export default function AdminDashboard() {
+  const { loading: authLoading } = useAuth();
   const [stats, setStats] = useState({ totalStudents: 0, todayAttendance: 0, attendanceRate: 0 });
   const [faculties, setFaculties] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -14,6 +16,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading) return;
+    
     const fetchData = async () => {
       try {
         const [statsRes, facultiesRes, deptsRes, progsRes, studentRes, lecturerRes] = await Promise.all([
@@ -37,7 +41,7 @@ export default function AdminDashboard() {
       }
     };
     fetchData();
-  }, []);
+  }, [authLoading]);
 
   if (loading) return <DashboardLayout><p className="text-white">Loading...</p></DashboardLayout>;
 

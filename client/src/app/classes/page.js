@@ -47,7 +47,7 @@ export default function ClassesPage() {
       setPrograms(programRes.data);
       setEnrolledStudents(enrollRes.data);
     } catch (err) {
-      console.error(err);
+      console.error('Fetch data error:', err.response?.data || err.message);
     } finally {
       setLoading(false);
     }
@@ -56,10 +56,7 @@ export default function ClassesPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
-      await axios.post('/api/structure/classes', formData, {
-        headers: { 'x-auth-token': token }
-      });
+      await axios.post('/api/structure/classes', formData);
       setShowForm(false);
       setFormData({
         name: '', courseId: '', type: 'lecture', semester: 1, academicYear: '2024/2025',
@@ -101,6 +98,7 @@ export default function ClassesPage() {
   const getUnenrolledStudents = (classId) => {
     const enrolledIds = getClassEnrollments(classId).map(e => e.studentId._id);
     const classItem = classes.find(c => c._id === classId);
+    // console.log("classItem", classItem);
     if (!classItem) return [];
     
     const classProgramId = String(classItem.courseId?.programId?._id || classItem.courseId?.programId || '');
@@ -275,10 +273,10 @@ export default function ClassesPage() {
               <table className="w-full mb-5">
                 <thead>
                   <tr>
-                    <th className="text-left p-2 border-b">ID</th>
-                    <th className="text-left p-2 border-b">Name</th>
-                    <th className="text-left p-2 border-b">Program</th>
-                    <th className="text-left p-2 border-b">Action</th>
+                    <th className="text-left p-2 text-white border-b">ID</th>
+                    <th className="text-left text-white p-2 border-b">Name</th>
+                    <th className="text-left text-white p-2 border-b">Program</th>
+                    <th className="text-left text-white p-2 border-b">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -337,6 +335,7 @@ export default function ClassesPage() {
 
             {(() => {
               let eligibleStudents = getUnenrolledStudents(selectedClass._id);
+              console.log(getClassEnrollments(selectedClass._id).map((enroll) => {enroll.id}));
               if (filterProgram) {
                 eligibleStudents = eligibleStudents.filter(s => s.programId?._id === filterProgram);
               }
