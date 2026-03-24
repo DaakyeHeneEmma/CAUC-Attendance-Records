@@ -20,9 +20,9 @@ export default function Home() {
   }, [user, loading, router]);
 
   return (
-    <div className="container">
-      <div className="main">
-        <h1 style={{ color: 'white', textAlign: 'center' }}>Loading...</h1>
+    <div className="min-h-screen p-5 bg-gradient-to-br from-indigo-500 to-purple-600">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-white text-center text-3xl">Loading...</h1>
       </div>
     </div>
   );

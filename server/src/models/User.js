@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   role: { type: String, enum: ['admin', 'lecturer', 'student'], default: 'student' },
   staffId: { type: String },
-  departmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Department' },
+  departmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Department', default: null },
   createdAt: { type: Date, default: Date.now }
 });
 

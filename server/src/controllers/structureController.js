@@ -248,12 +248,16 @@ exports.getEnrollments = async (req, res) => {
     const query = classId ? { classId } : {};
     
     const enrollments = await Enrollment.find(query)
-      .populate('studentId', 'name studentId email')
+      .populate('studentId', 'name studentId email programId level')
+      .populate({
+        path: 'studentId',
+        populate: { path: 'programId', select: 'name code' }
+      })
       .populate({
         path: 'classId',
         populate: { 
           path: 'courseId',
-          select: 'name code'
+          select: 'name code programId'
         }
       });
     res.json(enrollments);
@@ -292,6 +296,13 @@ exports.seedData = async (req, res) => {
     const program = new Program({
       name: 'BSc Computer Science',
       code: 'CS-BSC',
+      departmentId: department._id,
+      level: 'Degree',
+      duration: 4
+    },
+    {
+      name: 'BSc Information Technology',
+      code: 'CS-ICT',
       departmentId: department._id,
       level: 'Degree',
       duration: 4
