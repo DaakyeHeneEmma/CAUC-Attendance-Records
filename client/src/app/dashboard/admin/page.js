@@ -62,7 +62,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="bg-white p-5 rounded-xl shadow-lg overflow-x-auto mb-5">
+      {/* <div className="bg-white p-5 rounded-xl shadow-lg overflow-x-auto mb-5">
         <h2 className="text-gray-800 text-xl font-semibold mb-4">Faculties</h2>
         <table className="w-full border-collapse">
           <thead>
@@ -82,9 +82,9 @@ export default function AdminDashboard() {
             ))}
           </tbody>
         </table>
-      </div>
+      </div>*/}
 
-      <div className="bg-white p-5 rounded-xl shadow-lg overflow-x-auto mb-5">
+      {/* <div className="bg-white p-5 rounded-xl shadow-lg overflow-x-auto mb-5">
         <h2 className="text-gray-800 text-xl font-semibold mb-4">Departments</h2>
         <table className="w-full border-collapse">
           <thead>
@@ -104,9 +104,9 @@ export default function AdminDashboard() {
             ))}
           </tbody>
         </table>
-      </div>
+      </div>*/}
 
-      <div className="bg-white p-5 rounded-xl shadow-lg overflow-x-auto">
+      {/* <div className="bg-white p-5 rounded-xl shadow-lg overflow-x-auto">
         <h2 className="text-gray-800 text-xl font-semibold mb-4">Programs</h2>
         <table className="w-full border-collapse">
           <thead>
@@ -128,7 +128,7 @@ export default function AdminDashboard() {
             ))}
           </tbody>
         </table>
-      </div>
+      </div>*/}
 
       <div className="bg-white p-5 rounded-xl shadow-lg overflow-x-auto mt-5">
         <h2 className="text-gray-800 text-xl font-semibold mb-4">Students</h2>
